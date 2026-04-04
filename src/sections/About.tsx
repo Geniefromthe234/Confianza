@@ -2,25 +2,6 @@ import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { useCounter } from '@/hooks/useCounter';
 import { VideoReel } from '@/components/VideoReel';
 
-// Video clips for the reel
-const videoClips = [
-  '/videos/WhatsApp Video 2026-03-23 at 8.12.22 PM.mp4',
-  '/videos/WhatsApp Video 2026-03-23 at 8.12.25 PM.mp4',
-  '/videos/WhatsApp Video 2026-03-23 at 8.12.26 PM.mp4',
-  '/videos/WhatsApp Video 2026-03-23 at 8.12.27 PM.mp4',
-  '/videos/WhatsApp Video 2026-03-23 at 8.12.28 PM.mp4',
-  '/videos/WhatsApp Video 2026-03-23 at 8.12.33 PM.mp4',
-  '/videos/WhatsApp Video 2026-03-23 at 8.12.34 PM.mp4',
-  '/videos/WhatsApp Video 2026-03-23 at 8.12.36 PM.mp4',
-  '/videos/WhatsApp Video 2026-03-23 at 8.12.37 PM.mp4',
-  '/videos/WhatsApp Video 2026-03-23 at 8.12.40 PM.mp4',
-  '/videos/WhatsApp Video 2026-03-23 at 8.12.52 PM.mp4',
-  '/videos/WhatsApp Video 2026-03-23 at 8.13.01 PM.mp4',
-  '/videos/WhatsApp Video 2026-03-23 at 8.13.02 PM.mp4',
-  '/videos/WhatsApp Video 2026-03-23 at 8.13.04 PM.mp4',
-  '/videos/WhatsApp Video 2026-03-23 at 8.13.06 PM.mp4',
-];
-
 interface StatProps {
   target: number;
   suffix: string;
@@ -56,7 +37,7 @@ export function About() {
             className={`reveal-scale relative order-2 lg:order-1 ${imageRevealed ? 'revealed' : ''}`}
           >
             <div className="relative overflow-hidden rounded-xl h-[480px] lg:h-[580px]">
-              <VideoReel clips={videoClips} maxDuration={6} />
+              <VideoReel />
             </div>
             <div className="absolute -bottom-5 -right-5 lg:-right-8 bg-[#111113] border border-white/[0.06] rounded-xl px-6 py-5">
               <div className="text-3xl font-bold stat-number">60+</div>

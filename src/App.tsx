@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './App.css';
+import { ThemeProvider } from '@/context/ThemeContext';
 import { Navigation } from '@/sections/Navigation';
 import { Hero } from '@/sections/Hero';
 import { Services } from '@/sections/Services';
@@ -24,29 +25,31 @@ function App() {
   };
 
   return (
-    <div className="bg-[#09090b] text-white min-h-screen">
-      <a href="#main-content" className="skip-link">
-        Skip to content
-      </a>
+    <ThemeProvider>
+      <div className="theme-root min-h-screen">
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
 
-      <Navigation />
+        <Navigation />
 
-      <main id="main-content">
-        <Hero />
-        <Services />
-        <Portfolio />
-        <About />
-        <WhyUs />
-        <Testimonials />
-        <CTA />
-        <Contact onShowToast={showToast} />
-      </main>
+        <main id="main-content">
+          <Hero />
+          <Services />
+          <Portfolio />
+          <About />
+          <WhyUs />
+          <Testimonials />
+          <CTA />
+          <Contact onShowToast={showToast} />
+        </main>
 
-      <Footer />
+        <Footer />
 
-      <ScrollToTop />
-      <Toast message={toast.message} isVisible={toast.isVisible} />
-    </div>
+        <ScrollToTop />
+        <Toast message={toast.message} isVisible={toast.isVisible} />
+      </div>
+    </ThemeProvider>
   );
 }
 

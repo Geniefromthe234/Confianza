@@ -23,8 +23,12 @@ const reachUsLinks = [
   { href: 'https://linktr.ee/confianza_tech', label: 'linktr.ee/confianza_tech', external: true },
 ];
 
+import { useTheme } from '@/context/ThemeContext';
+
 export function Footer() {
+  const { theme } = useTheme();
   return (
+
     <footer className="border-t border-white/[0.03] px-6" role="contentinfo">
       <div className="max-w-7xl mx-auto py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16">
@@ -34,9 +38,10 @@ export function Footer() {
               <img
                 src="https://z-cdn-media.chatglm.cn/files/d00d489e-7eea-4d72-b3c3-bad7976cab39.png?auth_key=1875140345-ff5cc5006d31463cbcdf3ce46dc6cbd9-0-433ec9de62dc39d975dfa1e9c2bd3071"
                 alt=""
-                className="h-7 w-auto mix-blend-screen"
-                style={{ filter: 'contrast(1.15) brightness(1.1)' }}
+                className="logo h-7 w-auto"
+                style={{ mixBlendMode: theme === 'light' ? 'normal' : 'screen', filter: 'contrast(1.15) brightness(1.1)' }}
               />
+
               <div>
                 <div className="text-xs font-semibold tracking-wide text-white leading-none">CONFIANZA</div>
                 <div className="text-[9px] font-medium tracking-[0.18em] text-brand-400 uppercase leading-none mt-0.5">
