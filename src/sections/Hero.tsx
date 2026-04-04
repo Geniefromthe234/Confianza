@@ -94,6 +94,25 @@ export function Hero() {
     };
   }, [startAuto]);
 
+  // Page Visibility API for slideshow resume
+  const handleVisibilityChange = useCallback(() => {
+    if (document.visibilityState === 'visible') {
+      startAuto();
+    } else {
+      if (autoTimerRef.current) {
+        clearInterval(autoTimerRef.current);
+        autoTimerRef.current = null;
+      }
+    }
+  }, [startAuto]);
+
+  useEffect(() => {
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [handleVisibilityChange]);
+
   // Touch handling
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);

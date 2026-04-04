@@ -1,5 +1,6 @@
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { Star } from 'lucide-react';
+import { useRef, useCallback } from 'react';
 
 interface Testimonial {
   id: number;
@@ -84,18 +85,55 @@ const testimonials: Testimonial[] = [
     text: "I needed both cameras and electric fence for my factory. Confianza gave me a package deal that saved me money. The cameras are HD quality and I can watch everything from my phone in Dubai. The fence has already stopped two attempted break-ins. These guys know their work.",
     initials: 'YA',
   },
+  {
+    id: 9,
+    name: 'Grace O.',
+    location: 'Warri',
+    service: 'Solar & CCTV',
+    rating: 5,
+    text: "My shop was always dark when NEPA goes and customers no dey come. Confianza installed solar plus CCTV complete. Now I dey see everything clear-clear and light dey 24/7. Installation was fast, no drama. I don recommend give all my fellow traders.",
+    initials: 'GO',
+  },
+  {
+    id: 10,
+    name: 'Tunde R.',
+    location: 'Ilorin',
+    service: 'Full Wiring Rewire',
+    rating: 5,
+    text: "I inherited old house wey wiring don weak. One small spark for kitchen nearly catch fire. Confianza rewired everywhere — new DB board, proper earthing, everything. Engineer explain say dem use fire-rated cables. Peace of mind now.",
+    initials: 'TR',
+  },
+  {
+    id: 11,
+    name: 'Zainab S.',
+    location: 'Jos',
+    service: 'Inverter Upgrade',
+    rating: 5,
+    text: "My old 3kVA inverter no fit carry AC plus fridge. These people upgrade me to 7.5kVA with lithium batteries. Now everything dey work smooth, even when PHCN dey bring light. Dem test everything before dem commot. Excellent service.",
+    initials: 'ZS',
+  },
+  {
+    id: 12,
+    name: 'Victor U.',
+    location: 'Asaba',
+    service: 'Electric Gate Automation',
+    rating: 5,
+    text: "Manual gate tire me. Confianza automated am with motor and remote. Rain, sun — no wahala. Even add safety sensor so e no go jam car. Installation clean, no damage to wall. My neighbors dey ask for their number.",
+    initials: 'VU',
+  },
 ];
 
-// Duplicate testimonials for seamless infinite scroll
-const duplicatedTestimonials = [...testimonials, ...testimonials, ...testimonials];
+const baseTestimonials = testimonials.slice(0, 8);
+const row1Testimonials = Array(3).fill(baseTestimonials).flat();
+const row2Testimonials = Array(3).fill(baseTestimonials).flat();
+
+const CARD_WIDTH = 410;
 
 function TestimonialCard({ testimonial, index, total }: { testimonial: Testimonial; index: number; total: number }) {
-  // Calculate position-based rotation for curved effect
-  // Cards at edges rotate more, center cards are flat
   const position = index % total;
-  const normalizedPos = (position / (total - 1)) * 2 - 1; // -1 to 1
-  const rotateY = normalizedPos * -8; // Max 8 degrees rotation
-  const rotateX = Math.abs(normalizedPos) * 2; // Slight tilt based on distance from center
+  const normalizedPos = (position / (total - 1)) * 2 - 1;
+  const rotateY = normalizedPos * -8;
+  const rotateX = Math.abs(normalizedPos) * 2;
 
   return (
     <div
@@ -105,9 +143,7 @@ function TestimonialCard({ testimonial, index, total }: { testimonial: Testimoni
         transformStyle: 'preserve-3d',
       }}
     >
-      {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        {/* Avatar */}
         <div className="w-10 h-10 rounded-full bg-brand-400/20 flex items-center justify-center">
           <span className="text-xs font-semibold text-brand-400">{testimonial.initials}</span>
         </div>
@@ -118,8 +154,6 @@ function TestimonialCard({ testimonial, index, total }: { testimonial: Testimoni
           </div>
         </div>
       </div>
-
-      {/* Stars */}
       <div className="flex gap-0.5 mb-4">
         {Array.from({ length: 5 }).map((_, i) => (
           <Star
@@ -129,16 +163,104 @@ function TestimonialCard({ testimonial, index, total }: { testimonial: Testimoni
           />
         ))}
       </div>
-
-      {/* Quote */}
       <p className="text-sm text-zinc-400 font-light leading-[1.8] flex-1">"{testimonial.text}"</p>
     </div>
   );
 }
 
+/**
+ * THE ROOT CAUSE OF ALL PREVIOUS FAILURES:
+ * CSS animations and inline style `transform` fight over the same property on the same element.
+ * The animation always wins — your drag translateX gets ignored.
+ *
+ * THE FIX — two separate layers:
+ *   Layer A (drag layer, ref-controlled): gets translateX from drag. Has NO CSS animation.
+ *   Layer B (scroll layer, CSS-controlled): runs the infinite scroll animation. Has NO inline transform.
+ *
+ * We also write to the DOM directly via ref (no useState) so there's zero re-render lag during drag.
+ */
+function useCarouselDrag(dragLayerRef: React.RefObject<HTMLDivElement | null>) {
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const currentX = useRef(0);
+
+  const applyTransform = (x: number) => {
+    if (dragLayerRef.current) {
+      dragLayerRef.current.style.transform = `translateX(${x}px)`;
+    }
+  };
+
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isDragging.current = true;
+    startX.current = e.clientX - currentX.current;
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'grabbing';
+
+    const onMove = (ev: MouseEvent) => {
+      if (!isDragging.current) return;
+      const x = ev.clientX - startX.current;
+      currentX.current = x;
+      applyTransform(x);
+    };
+
+    const onUp = () => {
+      isDragging.current = false;
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      // Snap to nearest card boundary
+      const snapped = Math.round(currentX.current / CARD_WIDTH) * CARD_WIDTH;
+      currentX.current = snapped;
+      applyTransform(snapped);
+    };
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dragLayerRef]);
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    isDragging.current = true;
+    startX.current = e.touches[0].clientX - currentX.current;
+  }, []);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isDragging.current) return;
+    e.preventDefault();
+    const x = e.touches[0].clientX - startX.current;
+    currentX.current = x;
+    applyTransform(x);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dragLayerRef]);
+
+  const onTouchEnd = useCallback(() => {
+    isDragging.current = false;
+    const snapped = Math.round(currentX.current / CARD_WIDTH) * CARD_WIDTH;
+    currentX.current = snapped;
+    applyTransform(snapped);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dragLayerRef]);
+
+  return {
+    onMouseDown,
+    onTouchStart,
+    onTouchMove,
+    onTouchEnd,
+    onDragStart: (e: React.DragEvent) => e.preventDefault(),
+  };
+}
+
 export function Testimonials() {
   const { ref: titleRef, isRevealed: titleRevealed } = useScrollReveal<HTMLDivElement>();
   const { ref: descRef, isRevealed: descRevealed } = useScrollReveal<HTMLDivElement>();
+
+  const topDragRef = useRef<HTMLDivElement>(null);
+  const bottomDragRef = useRef<HTMLDivElement>(null);
+
+  const topDrag = useCarouselDrag(topDragRef);
+  const bottomDrag = useCarouselDrag(bottomDragRef);
 
   return (
     <section id="testimonials" className="py-28 md:py-40 overflow-hidden" aria-label="Client reviews">
@@ -174,35 +296,62 @@ export function Testimonials() {
         </div>
       </div>
 
-      {/* 3D Curved Carousel */}
-      <div className="relative" style={{ perspective: '1200px' }}>
-        {/* Top Row - Scrolls Left (inward curve) */}
-        <div className="testimonials-row-top mb-4 hover:pause">
-          <div className="testimonials-track-left flex gap-4">
-            {duplicatedTestimonials.map((testimonial, index) => (
-              <TestimonialCard
-                key={`top-${testimonial.id}-${index}`}
-                testimonial={testimonial}
-                index={index}
-                total={testimonials.length}
-              />
-            ))}
+      <div className="space-y-8">
+
+        {/* ── TOP ROW ───────────────────────────────────────────────────────────
+            Structure:
+              row-container  → 3D tilt + overflow:hidden + drag event listeners
+                drag-layer   → translateX written via ref during drag (no animation)
+                  scroll-layer → CSS infinite scroll animation (no inline transform)
+        ──────────────────────────────────────────────────────────────────────── */}
+        <div
+          className="testimonials-row-top group relative w-full max-w-[100rem] mx-auto overflow-hidden cursor-grab active:cursor-grabbing select-none"
+          style={{ userSelect: 'none', WebkitUserSelect: 'none' } as React.CSSProperties}
+          {...topDrag}
+        >
+          {/* drag layer — NO animation class */}
+          <div ref={topDragRef} style={{ willChange: 'transform' }}>
+            {/* scroll layer — animation lives here */}
+            <div className="testimonials-track-left flex gap-6">
+              {row1Testimonials.map((testimonial, index) => (
+                <TestimonialCard
+                  key={`top-${testimonial.id}-${index}`}
+                  testimonial={testimonial}
+                  index={index % 8}
+                  total={8}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Bottom Row - Scrolls Right (outward curve) */}
-        <div className="testimonials-row-bottom hover:pause">
-          <div className="testimonials-track-right flex gap-4">
-            {duplicatedTestimonials.map((testimonial, index) => (
-              <TestimonialCard
-                key={`bottom-${testimonial.id}-${index}`}
-                testimonial={testimonial}
-                index={index}
-                total={testimonials.length}
-              />
-            ))}
+        {/* ── BOTTOM ROW ────────────────────────────────────────────────────── */}
+        <div
+          className="testimonials-row-bottom group relative w-full max-w-[100rem] mx-auto overflow-hidden cursor-grab active:cursor-grabbing select-none"
+          style={{ userSelect: 'none', WebkitUserSelect: 'none' } as React.CSSProperties}
+          {...bottomDrag}
+        >
+          <div ref={bottomDragRef} style={{ willChange: 'transform' }}>
+            <div className="testimonials-track-right flex gap-6">
+              {row2Testimonials.map((testimonial, index) => (
+                <TestimonialCard
+                  key={`bottom-${testimonial.id}-${index}`}
+                  testimonial={testimonial}
+                  index={index % 8}
+                  total={8}
+                />
+              ))}
+            </div>
           </div>
         </div>
+
+      </div>
+
+      {/* Drag Hint */}
+      <div className="text-center mt-12">
+        <p className="text-zinc-500 text-sm font-light italic max-w-md mx-auto">
+          ← Drag to browse →
+        </p>
       </div>
 
       {/* Trust Bar */}
@@ -229,56 +378,54 @@ export function Testimonials() {
 
       <style>{`
         @keyframes scrollLeft {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-33.333%);
-          }
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-33.333%); }
         }
-
         @keyframes scrollRight {
-          0% {
-            transform: translateX(-33.333%);
-          }
-          100% {
-            transform: translateX(0);
-          }
+          0%   { transform: translateX(-33.333%); }
+          100% { transform: translateX(0); }
         }
 
+        /* 3D tilt on the outer row containers */
         .testimonials-row-top {
           transform-style: preserve-3d;
           transform: rotateX(5deg);
           transform-origin: center bottom;
         }
-
         .testimonials-row-bottom {
           transform-style: preserve-3d;
           transform: rotateX(-5deg);
           transform-origin: center top;
         }
 
+        /* Scroll animation ONLY on the innermost track divs */
         .testimonials-track-left {
           animation: scrollLeft 80s linear infinite;
           width: max-content;
         }
-
         .testimonials-track-right {
           animation: scrollRight 80s linear infinite;
           width: max-content;
         }
 
+        /* Pause animation on hover so drag feels natural */
         .testimonials-row-top:hover .testimonials-track-left,
-        .testimonials-row-bottom:hover .testimonials-track-right,
-        .hover\:pause:hover .testimonials-track-left,
-        .hover\:pause:hover .testimonials-track-right {
+        .testimonials-row-bottom:hover .testimonials-track-right {
           animation-play-state: paused;
+        }
+
+        /* Kill text selection and browser native drag throughout */
+        .testimonials-row-top *,
+        .testimonials-row-bottom * {
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          user-select: none;
+          -webkit-user-drag: none;
         }
 
         .testimonial-card {
           transition: border-color 0.4s ease, background-color 0.4s ease, transform 0.3s ease;
         }
-
         .testimonial-card:hover {
           border-color: rgba(255, 255, 255, 0.1);
           background-color: rgba(255, 255, 255, 0.015);

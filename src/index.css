@@ -312,3 +312,15 @@ html.light .border-white\/\[0\.08\] { border-color: rgba(15,23,42,0.1) !importan
 html.light .border-white\/15 { border-color: rgba(15,23,42,0.15) !important; }
 
 html.light .placeholder-zinc-700::placeholder { color: #94a3b8; }
+
+html.light #home .hero-headline,
+html.light #home .h-line-1,
+html.light #home .h-line-2 { color: #f8fafc !important; }
+html.light #home .accent-word { color: #38bdf8 !important; }
+html.light #home .h-sub { color: #cbd5e1 !important; }
+html.light #home .btn-ghost { 
+  color: #fff !important;
+  border-color: rgba(255,255,255,0.4) !important;
+  background: rgba(255,255,255,0.08) !important;
+}
+html.light .portfolio-overlay * { color: #fff !important; }
