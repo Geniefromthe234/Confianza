@@ -54,6 +54,8 @@ export function Navigation() {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           isScrolled ? 'nav-scrolled backdrop-blur-xl' : 'bg-transparent'
+        } ${
+          !isScrolled && activeSection === 'home' ? 'over-hero' : ''
         }`}
         role="navigation"
         aria-label="Main navigation"

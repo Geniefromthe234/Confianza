@@ -318,6 +318,16 @@ html.light #home .h-line-1,
 html.light #home .h-line-2 { color: #f8fafc !important; }
 html.light #home .accent-word { color: #38bdf8 !important; }
 html.light #home .h-sub { color: #cbd5e1 !important; }
+
+/* ── Light mode: force dark-mode nav colors when floating over the hero ── */
+html.light nav.over-hero .nav-link          { color: #a1a1aa; }
+html.light nav.over-hero .nav-link:hover    { color: #fff; }
+html.light nav.over-hero .nav-link.active   { color: #38bdf8; }
+html.light nav.over-hero .nav-brand         { color: #fff; }
+html.light nav.over-hero .nav-hamburger     { color: #a1a1aa; }
+html.light nav.over-hero .nav-hamburger:hover { color: #fff; }
+html.light nav.over-hero .theme-toggle-btn  { color: #a1a1aa; }
+html.light nav.over-hero .theme-toggle-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
 html.light #home .btn-ghost { 
   color: #fff !important;
   border-color: rgba(255,255,255,0.4) !important;
