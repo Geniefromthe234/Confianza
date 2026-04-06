@@ -380,8 +380,9 @@ html.light .portfolio-overlay * { color: #fff !important; }
 
 @media (max-width: 640px) {
   .whatsapp-btn {
-    bottom: 4rem;
+    bottom: 4.5rem;
     right: 1rem;
-    width: 13rem;
+    width: 3.5rem;
+    height: 3.5rem;
   }
 }
