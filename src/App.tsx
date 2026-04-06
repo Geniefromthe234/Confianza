@@ -13,6 +13,7 @@ import { Contact } from '@/sections/Contact';
 import { Footer } from '@/sections/Footer';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import { Toast } from '@/components/Toast';
+import { WhatsAppButton } from '@/components/WhatsAppButton';
 
 function App() {
   const [toast, setToast] = useState({ message: '', isVisible: false });
@@ -47,6 +48,7 @@ function App() {
         <Footer />
 
         <ScrollToTop />
+        <WhatsAppButton />
         <Toast message={toast.message} isVisible={toast.isVisible} />
       </div>
     </ThemeProvider>
